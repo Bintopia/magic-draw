@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 
 namespace Johnothing.MagicDraw.Shapes
 {
@@ -14,10 +9,15 @@ namespace Johnothing.MagicDraw.Shapes
 
         public Point B { get; set; }
 
+        private double _a;
+        private double _b;
+
         public Line(Point a, Point b)
         {
             A = a;
             B = b;
+            _a = (A.Y - B.Y) / (A.X - b.X);
+            _b = A.Y - _a * A.X;
         }
 
         public override void Draw()
@@ -45,7 +45,9 @@ namespace Johnothing.MagicDraw.Shapes
 
         public override void Zoom(double mutilple)
         {
-            B = new Point(B.X * mutilple, B.Y * mutilple);
+            var axisX = B.X * mutilple;
+            var axisY = _a * axisX + _b;
+            B = new Point(axisX, axisY);
             Draw();
         }
     }
