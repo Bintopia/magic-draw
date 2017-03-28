@@ -1,0 +1,167 @@
+﻿<metro:MetroWindow
+    x:Class="Johnothing.MagicDraw.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:metro="http://metro.mahapps.com/winfx/xaml/controls"
+    Title="May the source be with you. LOL - Magic Draw"
+    Width="1000"
+    Height="600"
+    TitleCaps="False"
+    TitleCharacterCasing="Normal"
+    WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0">
+            <GroupBox>
+                <StackPanel>
+                    <Button
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="Clear_Click"
+                        Style="{DynamicResource MetroCircleButtonStyle}">
+                        <Rectangle Width="24" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_cursor_default_outline}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button>
+                    <ToggleButton
+                        Name="btnLine"
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="Line_Click"
+                        Style="{DynamicResource MetroCircleToggleButtonStyle}">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_code_xml}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ToggleButton>
+                    <ToggleButton
+                        Name="btnCircle"
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="Circle_Click"
+                        Style="{DynamicResource MetroCircleToggleButtonStyle}">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_base_select}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ToggleButton>
+                    <ToggleButton
+                        Name="btnRectangle"
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="Rectangle_Click"
+                        Style="{DynamicResource MetroCircleToggleButtonStyle}">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_image_ants}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ToggleButton>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox>
+                <StackPanel>
+                    <Button
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="ZoomIn_Click"
+                        Style="{DynamicResource MetroCircleButtonStyle}">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_expand}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button>
+                    <Button
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="ZoomOut_Click"
+                        Style="{DynamicResource MetroCircleButtonStyle}">
+                        <Rectangle Width="32" Height="32">
+                            <Rectangle.Fill>
+                                <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_arrow_collapsed}" />
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button>
+                    <ToggleButton
+                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                        Click="ColorBrush_Click"
+                        Foreground="{Binding DataContext.ColorBrush, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                        IsChecked="{Binding DataContext.IsColorBrushToggled, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                        Style="{DynamicResource MetroCircleToggleButtonStyle}">
+                        <ToggleButton.ToolTip>
+                            <TextBlock Text="Ctrl + mouse left button click to change color." />
+                        </ToggleButton.ToolTip>
+                        <Rectangle
+                            Width="32"
+                            Height="32"
+                            Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ToggleButton}}}">
+                            <Rectangle.OpacityMask>
+                                <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_draw_paintbrush}" />
+                            </Rectangle.OpacityMask>
+                        </Rectangle>
+                    </ToggleButton>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <Canvas
+            Name="Stage"
+            Grid.Column="1"
+            ClipToBounds="True"
+            FocusManager.IsFocusScope="True"
+            MouseDown="Stage_MouseDown"
+            MouseMove="Stage_MouseMove"
+            MouseUp="Stage_MouseUp">
+            <TextBlock
+                Canvas.Left="{Binding DataContext.Coordinates.X, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                Canvas.Top="{Binding DataContext.Coordinates.Y, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                Margin="-32,-16,0,0"
+                Visibility="{Binding DataContext.CanDrawing, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}X:{0}&#10;Y:{1}">
+                        <Binding Path="DataContext.Coordinates.X" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" />
+                        <Binding Path="DataContext.Coordinates.Y" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Window}" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <Line
+                Stroke="Red"
+                Visibility="{Binding DataContext.CanDrawing, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                X1="0"
+                X2="{Binding ElementName=Stage, Path=ActualWidth}"
+                Y1="{Binding DataContext.Coordinates.Y, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                Y2="{Binding DataContext.Coordinates.Y, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" />
+            <Line
+                Stroke="Red"
+                Visibility="{Binding DataContext.CanDrawing, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                X1="{Binding DataContext.Coordinates.X, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                X2="{Binding DataContext.Coordinates.X, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                Y1="0"
+                Y2="{Binding ElementName=Stage, Path=ActualHeight}" />
+            <Canvas.Background>
+                <VisualBrush
+                    TileMode="Tile"
+                    Viewbox="0,0,29.5,29.5"
+                    ViewboxUnits="Absolute"
+                    Viewport="0,0,30,30"
+                    ViewportUnits="Absolute">
+                    <VisualBrush.Visual>
+                        <Rectangle
+                            Width="30"
+                            Height="30"
+                            Stroke="DarkSlateGray"
+                            StrokeThickness="0.5" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Canvas.Background>
+        </Canvas>
+        <StatusBar Grid.Row="1" Grid.ColumnSpan="2">
+            <Label Name="StatusMessage" />
+        </StatusBar>
+    </Grid>
+</metro:MetroWindow>
