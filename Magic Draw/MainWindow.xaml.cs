@@ -41,7 +41,7 @@ namespace Johnothing.MagicDraw
             {
                 if (e.ClickCount == 1)
                 {
-                    _drawingContext.Start = e.GetPosition(Stage);
+                    _drawingContext.InitiMousePoint = e.GetPosition(Stage);
                 }
             }
         }
@@ -68,13 +68,13 @@ namespace Johnothing.MagicDraw
 
         private double GetDistance()
         {
-            return Math.Sqrt(Math.Pow(_drawingContext.Start.X - _mouseEndPoint.X, 2) + Math.Pow(_drawingContext.Start.Y - _mouseEndPoint.Y, 2));
+            return Math.Sqrt(Math.Pow(_drawingContext.InitiMousePoint.X - _mouseEndPoint.X, 2) + Math.Pow(_drawingContext.InitiMousePoint.Y - _mouseEndPoint.Y, 2));
         }
 
         private Point GetMid()
         {
-            var x = (_mouseEndPoint.X - _drawingContext.Start.X) / 2 + _mouseEndPoint.X;
-            var y = (_mouseEndPoint.Y - _drawingContext.Start.Y) / 2 + _mouseEndPoint.Y;
+            var x = (_mouseEndPoint.X - _drawingContext.InitiMousePoint.X) / 2 + _mouseEndPoint.X;
+            var y = (_mouseEndPoint.Y - _drawingContext.InitiMousePoint.Y) / 2 + _mouseEndPoint.Y;
             return new Point(x, y);
         }
 
@@ -85,18 +85,18 @@ namespace Johnothing.MagicDraw
             {
                 case ShapeType.Circle:
                     shape = new Circle(GetDistance() / 2);
-                    _canvasLeft = _drawingContext.Start.X;
-                    _canvasTop = _drawingContext.Start.Y;
+                    _canvasLeft = _drawingContext.InitiMousePoint.X;
+                    _canvasTop = _drawingContext.InitiMousePoint.Y;
                     break;
                 case ShapeType.Rectangle:
-                    shape = new Rectangle(_mouseEndPoint.X - _drawingContext.Start.X, _mouseEndPoint.Y - _drawingContext.Start.Y);
-                    _canvasLeft = _drawingContext.Start.X;
-                    _canvasTop = _drawingContext.Start.Y;
+                    shape = new Rectangle(_mouseEndPoint.X - _drawingContext.InitiMousePoint.X, _mouseEndPoint.Y - _drawingContext.InitiMousePoint.Y);
+                    _canvasLeft = _drawingContext.InitiMousePoint.X;
+                    _canvasTop = _drawingContext.InitiMousePoint.Y;
                     break;
                 case ShapeType.Line:
-                    shape = new Line(_drawingContext.Start, _mouseEndPoint);
-                    _canvasLeft = _drawingContext.Start.X;
-                    _canvasTop = _drawingContext.Start.Y;
+                    shape = new Line(_drawingContext.InitiMousePoint, _mouseEndPoint);
+                    _canvasLeft = _drawingContext.InitiMousePoint.X;
+                    _canvasTop = _drawingContext.InitiMousePoint.Y;
                     break;
                 default:
                     shape = null;
@@ -108,8 +108,11 @@ namespace Johnothing.MagicDraw
                 shape.BorderColorBrush = _drawingContext.ColorBrush;
                 shape.Background = _drawingContext.ColorBrush;
                 shape.Draw();
-                shape.Instance.SetValue(Canvas.LeftProperty, _canvasLeft);
-                shape.Instance.SetValue(Canvas.TopProperty, _canvasTop);
+                if (!(shape is Line))
+                {
+                    shape.Instance.SetValue(Canvas.LeftProperty, _canvasLeft);
+                    shape.Instance.SetValue(Canvas.TopProperty, _canvasTop);
+                }
 
                 shape.Instance.MouseUp += ShapeInstance_MouseUp;
                 shape.Instance.LostFocus += ShapeInstance_LostFocus;
@@ -128,10 +131,18 @@ namespace Johnothing.MagicDraw
         {
             if (e.ClickCount == 1 && sender is System.Windows.Shapes.Shape shapeInstance)
             {
-                _drawingContext.Start = e.GetPosition(Stage);
+                _drawingContext.InitiMousePoint = e.GetPosition(Stage);
                 var shape = _shapes.Find(s => s.Instance == shapeInstance);
-                _canvasLeft = (double)shapeInstance.GetValue(Canvas.LeftProperty);
-                _canvasTop = (double)shapeInstance.GetValue(Canvas.TopProperty);
+                if (shape is Line)
+                {
+                    _canvasLeft = (shape as Line).A.X;
+                    _canvasTop = (shape as Line).A.Y;
+                }
+                else
+                {
+                    _canvasLeft = (double)shapeInstance.GetValue(Canvas.LeftProperty);
+                    _canvasTop = (double)shapeInstance.GetValue(Canvas.TopProperty);
+                }
             }
         }
 
@@ -140,8 +151,8 @@ namespace Johnothing.MagicDraw
             if (e.LeftButton == MouseButtonState.Pressed && sender is System.Windows.Shapes.Shape shapeInstance)
             {
                 var current = e.GetPosition(Stage);
-                var xOffset = current.X - _drawingContext.Start.X;
-                var yOffset = current.Y - _drawingContext.Start.Y;
+                var xOffset = current.X - _drawingContext.InitiMousePoint.X;
+                var yOffset = current.Y - _drawingContext.InitiMousePoint.Y;
                 shapeInstance.SetValue(Canvas.LeftProperty, xOffset + _canvasLeft);
                 shapeInstance.SetValue(Canvas.TopProperty, yOffset + _canvasTop);
             }
@@ -178,19 +189,19 @@ namespace Johnothing.MagicDraw
         {
             shape.BorderColorBrush = Brushes.LightSeaGreen;
             shape.Instance.Stroke = shape.BorderColorBrush;
-            var strokeDashArry = new DoubleCollection
+            if (!(shape is Line))
             {
-                2,
-                2
-            };
-            shape.Instance.StrokeDashArray = strokeDashArry;
-            shape.Instance.StrokeThickness = 2;
+                var strokeDashArry = new DoubleCollection { 2, 2 };
+                shape.Instance.StrokeDashArray = strokeDashArry;
+            }
+
+            shape.Instance.StrokeThickness = 3;
             FocusManager.SetFocusedElement(Stage, shape.Instance);
         }
 
-        private static void RemoveShapeLogicalFocus(ShapeObject shape)
+        private void RemoveShapeLogicalFocus(ShapeObject shape)
         {
-            shape.BorderColorBrush = Brushes.SeaShell;
+            shape.BorderColorBrush = _drawingContext.ColorBrush;
             if (!(shape is Line))
             {
                 shape.Instance.StrokeThickness = 0.1;

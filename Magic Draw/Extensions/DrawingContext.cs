@@ -9,7 +9,7 @@ namespace Johnothing.MagicDraw.Extensions
         public DrawingContext()
         {
             Clear();
-            ColorBrush = new SolidColorBrush(Colors.SeaShell);
+            ColorBrush = new SolidColorBrush(Colors.Tomato);
         }
 
         private bool _isColorBrushToggled;
@@ -60,14 +60,14 @@ namespace Johnothing.MagicDraw.Extensions
             }
         }
 
-        private Point _start;
-        public Point Start
+        private Point _initiMousePoint;
+        public Point InitiMousePoint
         {
-            get { return _start; }
+            get { return _initiMousePoint; }
             set
             {
-                _start = value;
-                RaisePropertyChanged(() => Start);
+                _initiMousePoint = value;
+                RaisePropertyChanged(() => InitiMousePoint);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Johnothing.MagicDraw.Extensions
         {
             ShapeType = ShapeType.None;
             CanDrawing = false;
-            Start = new Point(-1, -1);
+            InitiMousePoint = new Point(-1, -1);
             Coordinates = new Point(-1, -1);
             IsColorBrushToggled = false;
         }

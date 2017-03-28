@@ -36,7 +36,7 @@ namespace Johnothing.MagicDraw.Shapes
 
             base.Draw();
 
-            line.StrokeThickness = 3;
+            line.StrokeThickness = 2;
         }
 
         public override double Area => throw new NotImplementedException();
@@ -47,6 +47,12 @@ namespace Johnothing.MagicDraw.Shapes
         {
             var axisX = B.X * mutilple;
             var axisY = _a * axisX + _b;
+
+            if (axisX <= A.X + 5)
+            {//To prevent zoom in on the opposite direction
+                return;
+            }
+
             B = new Point(axisX, axisY);
             Draw();
         }
